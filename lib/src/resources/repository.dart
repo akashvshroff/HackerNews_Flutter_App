@@ -7,7 +7,7 @@ class Repository {
   NewsDbProvider dbProvider = NewsDbProvider();
   NewsApiProvider apiProvider = NewsApiProvider();
 
-  List<int> fetchTopIds() {
+  Future<List<int>> fetchTopIds() {
     return apiProvider.fetchTopIds();
   }
 

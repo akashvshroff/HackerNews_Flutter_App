@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/cupertino.dart';
-
 class ItemModel {
   final int id; // item's unique id.
   final bool deleted; // if the item is deleted.
