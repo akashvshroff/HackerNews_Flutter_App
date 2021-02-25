@@ -101,7 +101,7 @@ class NewsDbProvider implements Source, Cache {
     Map<String, dynamic> idMap = {
       "id": 1,
       "date": _getDate(),
-      "ids": topIds,
+      "ids": json.encode(topIds),
     };
     return db.update(
       'Ids',
