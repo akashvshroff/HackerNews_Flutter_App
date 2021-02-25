@@ -5,17 +5,14 @@ import 'package:path/path.dart';
 import 'dart:async';
 import '../models/item_model.dart';
 import 'repository.dart';
+import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class NewsDbProvider implements Source, Cache {
   Database db;
 
   NewsDbProvider() {
     init();
-  }
-
-  Future<List<int>> fetchTopIds() {
-    //TO DO - store and fetch top ids.
-    return null;
   }
 
   void init() async {
@@ -43,8 +40,24 @@ class NewsDbProvider implements Source, Cache {
               descendants INTEGER
             )
           ''');
+        newDb.execute("""
+        CREATE TABLE Ids(
+          id INTEGER,
+          date TEXT,
+          ids BLOB,
+        )
+        """);
+        newDb.execute(
+            """INSERT INTO Ids (id, date, text) VALUES (1, NULL, NULL)""");
       },
     );
+  }
+
+  String _getDate() {
+    var now = DateTime.now();
+    var formatter = new DateFormat('yyyy-MM-dd');
+    String formattedDate = formatter.format(now);
+    return formattedDate;
   }
 
   Future<ItemModel> fetchItem(int id) async {
@@ -63,10 +76,38 @@ class NewsDbProvider implements Source, Cache {
     }
   }
 
+  Future<List<int>> fetchTopIds() async {
+    final maps = await db.query(
+      "Ids",
+      columns: null,
+      where: 'id = ?',
+      whereArgs: [1],
+    );
+
+    if (maps[0]['date'] != null && maps[0]['date'] == _getDate()) {
+      //if there is data and data is of today.
+      return json.decode(maps[0]['ids']);
+    }
+  }
+
   Future<int> addItem(ItemModel item) {
     return db.insert(
       'Items',
       item.toMapForDb(),
+    );
+  }
+
+  Future<int> addTopIds(List<int> topIds) {
+    Map<String, dynamic> idMap = {
+      "id": 1,
+      "date": _getDate(),
+      "ids": topIds,
+    };
+    return db.update(
+      'Ids',
+      idMap,
+      where: 'id = ?',
+      whereArgs: [1],
     );
   }
 }

@@ -21,6 +21,9 @@ class Repository {
         break;
       }
     }
+    for (var cache in caches) {
+      cache.addTopIds(topIds);
+    }
     return topIds;
   }
 
@@ -50,4 +53,5 @@ abstract class Source {
 
 abstract class Cache {
   Future<int> addItem(ItemModel item);
+  Future<int> addTopIds(List<int> topIds);
 }
