@@ -28,6 +28,8 @@ dependencies:
   http: ^0.12.2
   path: ^1.7.0
   intl: ^0.16.1
+  rxdart: ^0.25.0
+
 
 
   # The following adds the Cupertino Icons font to your application.
