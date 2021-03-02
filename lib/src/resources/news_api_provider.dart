@@ -9,7 +9,7 @@ import 'repository.dart';
 final root = 'http://hacker-news.firebaseio.com/v0';
 
 class NewsApiProvider implements Source {
-  final Client client = Client();
+  Client client = Client();
 
   Future<List<int>> fetchTopIds() async {
     final response = await client.get('$root/topstories.json?print=pretty');
