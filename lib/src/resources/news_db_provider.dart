@@ -45,11 +45,11 @@ class NewsDbProvider implements Source, Cache {
         (
           id INTEGER,
           date TEXT,
-          ids BLOB,
+          ids BLOB
         )
         ''');
-        newDb.execute(
-            """INSERT INTO Ids (id, date, text) VALUES (1, NULL, NULL)""");
+        newDb
+            .execute('INSERT INTO Ids (id, date, text) VALUES (1, NULL, NULL)');
       },
     );
   }
