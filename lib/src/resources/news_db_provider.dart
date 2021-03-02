@@ -10,12 +10,16 @@ import 'package:intl/intl.dart';
 
 class NewsDbProvider implements Source, Cache {
   Database db;
+  var readyCompleter = Completer();
+  Future get ready => readyCompleter.future;
 
   NewsDbProvider() {
-    init();
+    init().then((_) {
+      readyCompleter.complete();
+    });
   }
 
-  void init() async {
+  Future init() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
     final path = join(documentsDirectory.path, 'items.db');
     db = await openDatabase(
@@ -48,8 +52,7 @@ class NewsDbProvider implements Source, Cache {
           ids BLOB
         )
         ''');
-        newDb
-            .execute('INSERT INTO Ids (id, date, text) VALUES (1, NULL, NULL)');
+        newDb.execute('INSERT INTO Ids (id, date, ids) VALUES (1, NULL, NULL)');
       },
     );
   }
@@ -62,6 +65,7 @@ class NewsDbProvider implements Source, Cache {
   }
 
   Future<ItemModel> fetchItem(int id) async {
+    await ready;
     final maps = await db.query(
       "Items",
       columns: null,
@@ -78,6 +82,7 @@ class NewsDbProvider implements Source, Cache {
   }
 
   Future<List<int>> fetchTopIds() async {
+    await ready;
     final maps = await db.query(
       "Ids",
       columns: null,
@@ -87,7 +92,7 @@ class NewsDbProvider implements Source, Cache {
 
     if (maps[0]['date'] != null && maps[0]['date'] == _getDate()) {
       //if there is data and data is of today.
-      return json.decode(maps[0]['ids']);
+      return json.decode(maps[0]['ids']).cast<int>();
     }
   }
 
@@ -113,4 +118,4 @@ class NewsDbProvider implements Source, Cache {
   }
 }
 
-final NewsDbProvider newsDbProvider = NewsDbProvider();
+final newsDbProvider = NewsDbProvider();
