@@ -40,13 +40,14 @@ class NewsDbProvider implements Source, Cache {
               descendants INTEGER
             )
           ''');
-        newDb.execute("""
-        CREATE TABLE Ids(
+        newDb.execute('''
+        CREATE TABLE Ids
+        (
           id INTEGER,
           date TEXT,
           ids BLOB,
         )
-        """);
+        ''');
         newDb.execute(
             """INSERT INTO Ids (id, date, text) VALUES (1, NULL, NULL)""");
       },
