@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:news/src/widgets/loading_container.dart';
 import '../models/item_model.dart';
 import 'dart:async';
 import '../blocs/stories_provider.dart';
+import 'loading_container.dart';
 
 class NewsListTile extends StatelessWidget {
   final int itemId;
@@ -15,13 +17,13 @@ class NewsListTile extends StatelessWidget {
       stream: bloc.items,
       builder: (context, AsyncSnapshot<Map<int, Future<ItemModel>>> snapshot) {
         if (!snapshot.hasData) {
-          return Text('Stream still loading');
+          return LoadingContainer();
         }
         return FutureBuilder(
           future: snapshot.data[itemId],
           builder: (context, AsyncSnapshot<ItemModel> itemSnapshot) {
             if (!itemSnapshot.hasData) {
-              return Text('Still loading item $itemId');
+              return LoadingContainer();
             }
             return buildTile(itemSnapshot.data);
           },
@@ -31,12 +33,26 @@ class NewsListTile extends StatelessWidget {
   }
 
   Widget buildTile(ItemModel item) {
-    return ListTile(
-      title: Text(item.title),
-      subtitle: Text(
-        '${item.score} upvotes',
-        style: TextStyle(fontStyle: FontStyle.italic),
-      ),
+    return Column(
+      children: <Widget>[
+        ListTile(
+          title: Text(item.title),
+          subtitle: Text(
+            '${item.score} upvotes',
+            style: TextStyle(fontStyle: FontStyle.italic),
+          ),
+          trailing: Column(
+            children: <Widget>[
+              Icon(Icons.comment),
+              Text('${item.descendants}'),
+            ],
+          ),
+        ),
+        Divider(
+          height: 8.0,
+          thickness: 2.0,
+        )
+      ],
     );
   }
 }
