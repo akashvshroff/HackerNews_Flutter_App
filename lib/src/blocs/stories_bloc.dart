@@ -8,34 +8,45 @@ class StoriesBloc {
   final _topIds = PublishSubject<List<int>>();
   final _itemsOutput = BehaviorSubject<Map<int, Future<ItemModel>>>();
   final _itemsFetcher = PublishSubject<int>();
-  final _queryItems = PublishSubject<String>();
+  final _queryItems = BehaviorSubject<String>();
 
   // getter to Stream
   Stream<List<int>> get topIds => _topIds.stream;
   Stream<Map<int, Future<ItemModel>>> get items => _itemsOutput.stream;
-  Stream<String> get query => _queryItems.stream;
+  Stream<String> get queryStream => _queryItems.stream;
 
   //getters to Sink
   Function(int) get fetchItem => _itemsFetcher.sink.add;
+  Function(String) get addQuery => _queryItems.sink.add;
 
   StoriesBloc() {
     _itemsFetcher.stream.transform(_itemsTransformer()).pipe(_itemsOutput);
   }
 
   void queryIds(String query) async {
-    final resultIds = [];
+    if (query.isEmpty || query == null) {
+      fetchTopIds();
+    }
+    _topIds.add(null);
+    query = query.toLowerCase();
+    final List<int> resultIds = [];
     final topIds = await _repository.fetchTopIds();
+    print('${topIds.length}');
     for (int id in topIds) {
+      // print('$id');
       ItemModel item = await _repository.fetchItem(id);
-      if (item.text.contains(query)) {
+      if (item.title.toLowerCase().contains(query)) {
         resultIds.add(id);
       }
-      if (resultIds.isEmpty) {
-        _queryItems.sink.addError('No such item exists');
-      } else {
-        _queryItems.sink.add(query);
-        _topIds.sink.add(resultIds);
-      }
+    }
+    print('finished checking all ids');
+    if (resultIds.isEmpty) {
+      print('no items');
+      _queryItems.sink.addError('No such item exists');
+      _topIds.sink.add(topIds);
+    } else {
+      _queryItems.sink.add(query);
+      _topIds.sink.add(resultIds);
     }
   }
 

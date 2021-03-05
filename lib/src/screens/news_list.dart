@@ -13,22 +13,37 @@ class NewsList extends StatelessWidget {
       appBar: AppBar(
         title: Text("TOP NEWS"),
       ),
-      body: buildList(bloc),
+      body: Column(
+        children: <Widget>[
+          searchQuery(bloc),
+          Expanded(child: buildList(bloc)),
+        ],
+      ),
     );
   }
 
   Widget searchQuery(bloc) {
-    return StreamBuilder(
-      stream: bloc.query,
-      builder: (context, snapshot) {
-        return TextField(
-          onChanged: bloc.queryIds,
-          decoration: InputDecoration(
-            labelText: 'Enter query',
-            errorText: snapshot.error,
-          ),
-        );
-      },
+    return Container(
+      height: 50.0,
+      margin: EdgeInsets.all(5.0),
+      padding: EdgeInsets.only(
+        left: 8.0,
+        right: 8.0,
+        top: 5.0,
+      ),
+      child: StreamBuilder(
+        stream: bloc.queryStream,
+        builder: (context, snapshot) {
+          return TextField(
+            onChanged: bloc.addQuery,
+            onSubmitted: bloc.queryIds,
+            decoration: InputDecoration(
+              hintText: 'Enter query',
+              errorText: snapshot.error,
+            ),
+          );
+        },
+      ),
     );
   }
 
@@ -42,14 +57,13 @@ class NewsList extends StatelessWidget {
           );
         }
         return Refresh(
-          child: ListView.builder(
-            itemCount: snapshot.data.length,
-            itemBuilder: (context, int index) {
-              bloc.fetchItem(snapshot.data[index]);
-              return NewsListTile(itemId: snapshot.data[index]);
-            },
-          ),
-        );
+            child: ListView.builder(
+          itemCount: snapshot.data.length,
+          itemBuilder: (context, int index) {
+            bloc.fetchItem(snapshot.data[index]);
+            return NewsListTile(itemId: snapshot.data[index]);
+          },
+        ));
       },
     );
   }
