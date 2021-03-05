@@ -8,16 +8,35 @@ class StoriesBloc {
   final _topIds = PublishSubject<List<int>>();
   final _itemsOutput = BehaviorSubject<Map<int, Future<ItemModel>>>();
   final _itemsFetcher = PublishSubject<int>();
+  final _queryItems = PublishSubject<String>();
 
   // getter to Stream
   Stream<List<int>> get topIds => _topIds.stream;
   Stream<Map<int, Future<ItemModel>>> get items => _itemsOutput.stream;
+  Stream<String> get query => _queryItems.stream;
 
   //getters to Sink
   Function(int) get fetchItem => _itemsFetcher.sink.add;
 
   StoriesBloc() {
     _itemsFetcher.stream.transform(_itemsTransformer()).pipe(_itemsOutput);
+  }
+
+  void queryIds(String query) async {
+    final resultIds = [];
+    final topIds = await _repository.fetchTopIds();
+    for (int id in topIds) {
+      ItemModel item = await _repository.fetchItem(id);
+      if (item.text.contains(query)) {
+        resultIds.add(id);
+      }
+      if (resultIds.isEmpty) {
+        _queryItems.sink.addError('No such item exists');
+      } else {
+        _queryItems.sink.add(query);
+        _topIds.sink.add(resultIds);
+      }
+    }
   }
 
   void fetchTopIds() async {
@@ -40,6 +59,7 @@ class StoriesBloc {
   }
 
   void dispose() {
+    _queryItems.close();
     _itemsFetcher.close();
     _itemsOutput.close();
     _topIds.close();

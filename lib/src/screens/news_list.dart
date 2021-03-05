@@ -17,6 +17,21 @@ class NewsList extends StatelessWidget {
     );
   }
 
+  Widget searchQuery(bloc) {
+    return StreamBuilder(
+      stream: bloc.query,
+      builder: (context, snapshot) {
+        return TextField(
+          onChanged: bloc.queryIds,
+          decoration: InputDecoration(
+            labelText: 'Enter query',
+            errorText: snapshot.error,
+          ),
+        );
+      },
+    );
+  }
+
   Widget buildList(StoriesBloc bloc) {
     return StreamBuilder(
       stream: bloc.topIds,
