@@ -6,6 +6,7 @@ import '../resources/repository.dart';
 class CommentsBloc {
   final _commentsFetcher = PublishSubject<int>();
   final _commentsOutput = BehaviorSubject<Map<int, Future<ItemModel>>>();
+  final _repository = Repository();
 
   //stream
   Stream<Map<int, Future<ItemModel>>> get itemWithComments =>
@@ -13,6 +14,22 @@ class CommentsBloc {
 
   //sink
   Function(int) get fetchItemWithComments => _commentsFetcher.sink.add;
+
+  CommentsBloc() {
+    _commentsFetcher.transform(_commentsTransformer()).pipe(_commentsOutput);
+  }
+
+  _commentsTransformer() {
+    return ScanStreamTransformer<int, Map<int, Future<ItemModel>>>(
+      (cache, int id, index) {
+        cache[id] = _repository.fetchItem(id);
+        cache[id].then((ItemModel item) {
+          item.kids.forEach((kidId) => fetchItemWithComments(kidId));
+        });
+      },
+      <int, Future<ItemModel>>{},
+    );
+  }
 
   void dispose() {
     _commentsFetcher.close();
