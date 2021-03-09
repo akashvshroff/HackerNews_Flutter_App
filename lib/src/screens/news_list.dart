@@ -12,6 +12,7 @@ class NewsList extends StatefulWidget {
 
 class NewsListState extends State<NewsList> {
   String query = '';
+  final TextEditingController queryController = TextEditingController();
 
   Widget build(BuildContext context) {
     final bloc = StoriesProvider.of(context);
@@ -38,6 +39,7 @@ class NewsListState extends State<NewsList> {
           top: 5.0,
         ),
         child: TextField(
+          controller: queryController,
           onSubmitted: (String newQuery) {
             setState(() {
               query = newQuery.toLowerCase();

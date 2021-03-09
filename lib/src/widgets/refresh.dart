@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import '../blocs/stories_provider.dart';
 import 'dart:async';
+import '../screens/news_list.dart';
 
 class Refresh extends StatelessWidget {
   final Widget child;
+  final NewsListState parent;
 
-  Refresh({this.child});
+  Refresh({this.child, this.parent});
 
   @override
   Widget build(BuildContext context) {
@@ -13,6 +15,7 @@ class Refresh extends StatelessWidget {
     return RefreshIndicator(
       child: child,
       onRefresh: () async {
+        parent.queryController.text = '';
         await bloc.clearCache();
         await bloc.fetchTopIds();
       },
