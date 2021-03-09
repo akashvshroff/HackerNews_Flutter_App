@@ -5,10 +5,16 @@ import '../blocs/stories_provider.dart';
 import '../widgets/news_list_tile.dart';
 import '../widgets/refresh.dart';
 
-class NewsList extends StatelessWidget {
+class NewsList extends StatefulWidget {
+  @override
+  _NewsListState createState() => _NewsListState();
+}
+
+class _NewsListState extends State<NewsList> {
+  String query = '';
+
   Widget build(BuildContext context) {
     final bloc = StoriesProvider.of(context);
-    bloc.fetchTopIds();
     return Scaffold(
       appBar: AppBar(
         title: Text("TOP NEWS"),
@@ -24,27 +30,23 @@ class NewsList extends StatelessWidget {
 
   Widget searchQuery(bloc) {
     return Container(
-      height: 50.0,
-      margin: EdgeInsets.all(5.0),
-      padding: EdgeInsets.only(
-        left: 8.0,
-        right: 8.0,
-        top: 5.0,
-      ),
-      child: StreamBuilder(
-        stream: bloc.queryStream,
-        builder: (context, snapshot) {
-          return TextField(
-            onChanged: bloc.addQuery,
-            onSubmitted: bloc.queryIds,
-            decoration: InputDecoration(
-              hintText: 'Enter query',
-              errorText: snapshot.error,
-            ),
-          );
-        },
-      ),
-    );
+        height: 50.0,
+        margin: EdgeInsets.all(5.0),
+        padding: EdgeInsets.only(
+          left: 8.0,
+          right: 8.0,
+          top: 5.0,
+        ),
+        child: TextField(
+          onSubmitted: (String newQuery) {
+            setState(() {
+              query = newQuery.toLowerCase();
+            });
+          },
+          decoration: InputDecoration(
+            hintText: 'Enter query',
+          ),
+        ));
   }
 
   Widget buildList(StoriesBloc bloc) {
@@ -61,7 +63,10 @@ class NewsList extends StatelessWidget {
           itemCount: snapshot.data.length,
           itemBuilder: (context, int index) {
             bloc.fetchItem(snapshot.data[index]);
-            return NewsListTile(itemId: snapshot.data[index]);
+            return NewsListTile(
+              itemId: snapshot.data[index],
+              query: query,
+            );
           },
         ));
       },

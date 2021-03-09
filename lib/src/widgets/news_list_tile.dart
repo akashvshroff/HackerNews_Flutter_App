@@ -7,8 +7,9 @@ import 'loading_container.dart';
 
 class NewsListTile extends StatelessWidget {
   final int itemId;
+  final String query;
 
-  NewsListTile({this.itemId});
+  NewsListTile({this.itemId, this.query});
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +25,14 @@ class NewsListTile extends StatelessWidget {
           builder: (context, AsyncSnapshot<ItemModel> itemSnapshot) {
             if (!itemSnapshot.hasData) {
               return LoadingContainer();
+            } else if (itemSnapshot.data.title.toLowerCase().contains(query)) {
+              return buildTile(context, itemSnapshot.data);
+            } else {
+              return Container(
+                height: 0.0,
+                width: 0.0,
+              );
             }
-            return buildTile(context, itemSnapshot.data);
           },
         );
       },

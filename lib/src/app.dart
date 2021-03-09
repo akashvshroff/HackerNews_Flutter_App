@@ -9,7 +9,6 @@ class App extends StatelessWidget {
     return StoriesProvider(
       child: MaterialApp(
         title: 'News',
-        home: NewsList(),
         onGenerateRoute: routes,
       ),
     );
@@ -19,6 +18,8 @@ class App extends StatelessWidget {
     if (settings.name == '/') {
       return MaterialPageRoute(
         builder: (context) {
+          final bloc = StoriesProvider.of(context);
+          bloc.fetchTopIds();
           return NewsList();
         },
       );
