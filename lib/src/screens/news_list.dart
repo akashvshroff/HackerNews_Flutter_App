@@ -7,10 +7,10 @@ import '../widgets/refresh.dart';
 
 class NewsList extends StatefulWidget {
   @override
-  _NewsListState createState() => _NewsListState();
+  NewsListState createState() => NewsListState();
 }
 
-class _NewsListState extends State<NewsList> {
+class NewsListState extends State<NewsList> {
   String query = '';
 
   Widget build(BuildContext context) {
@@ -59,16 +59,17 @@ class _NewsListState extends State<NewsList> {
           );
         }
         return Refresh(
+            parent: this,
             child: ListView.builder(
-          itemCount: snapshot.data.length,
-          itemBuilder: (context, int index) {
-            bloc.fetchItem(snapshot.data[index]);
-            return NewsListTile(
-              itemId: snapshot.data[index],
-              query: query,
-            );
-          },
-        ));
+              itemCount: snapshot.data.length,
+              itemBuilder: (context, int index) {
+                bloc.fetchItem(snapshot.data[index]);
+                return NewsListTile(
+                  itemId: snapshot.data[index],
+                  query: query,
+                );
+              },
+            ));
       },
     );
   }
