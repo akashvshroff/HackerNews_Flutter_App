@@ -16,7 +16,21 @@ class Comment extends StatelessWidget {
         if (!snapshot.hasData) {
           return Text("Still Loading");
         }
-        return Text(snapshot.data.text);
+
+        final List<Widget> children = [
+          Text(snapshot.data.text),
+        ];
+
+        snapshot.data.kids.forEach((kidId) {
+          children.add(Comment(
+            itemId: kidId,
+            itemMap: itemMap,
+          ));
+        });
+
+        return Column(
+          children: children,
+        );
       },
     );
   }
