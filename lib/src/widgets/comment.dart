@@ -3,10 +3,11 @@ import 'dart:async';
 import '../models/item_model.dart';
 
 class Comment extends StatelessWidget {
+  final int depth;
   final int itemId;
   final Map<int, Future<ItemModel>> itemMap;
 
-  Comment({this.itemId, this.itemMap});
+  Comment({this.itemId, this.itemMap, this.depth});
 
   @override
   Widget build(BuildContext context) {
@@ -17,14 +18,25 @@ class Comment extends StatelessWidget {
           return Text("Still Loading");
         }
 
+        final item = snapshot.data;
+
         final List<Widget> children = [
-          Text(snapshot.data.text),
+          ListTile(
+            contentPadding: EdgeInsets.only(
+              right: 16.0,
+              left: (depth + 1) * 16.0,
+            ),
+            title: Text(item.text),
+            subtitle: item.by != '' ? Text(item.by) : Text("Deleted"),
+          ),
+          Divider(),
         ];
 
-        snapshot.data.kids.forEach((kidId) {
+        item.kids.forEach((kidId) {
           children.add(Comment(
             itemId: kidId,
             itemMap: itemMap,
+            depth: depth + 1,
           ));
         });
 
