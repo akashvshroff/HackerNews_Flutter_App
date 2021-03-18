@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import '../models/item_model.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Comment extends StatelessWidget {
   final int depth;
@@ -26,7 +28,7 @@ class Comment extends StatelessWidget {
               right: 16.0,
               left: (depth + 1) * 16.0,
             ),
-            title: Text(item.text),
+            title: buildHtml(item),
             subtitle: item.by != '' ? Text(item.by) : Text("Deleted"),
           ),
           Divider(),
@@ -45,5 +47,20 @@ class Comment extends StatelessWidget {
         );
       },
     );
+  }
+
+  Widget buildHtml(ItemModel item) {
+    return Html(
+      data: item.text,
+      onLinkTap: (String url) {
+        launchUrl(url);
+      },
+    );
+  }
+
+  launchUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    }
   }
 }
