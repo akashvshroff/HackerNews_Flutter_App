@@ -21,7 +21,7 @@ class NewsDbProvider implements Source, Cache {
 
   Future init() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    final path = join(documentsDirectory.path, 'items.db');
+    final path = join(documentsDirectory.path, 'news_items.db');
     db = await openDatabase(
       path,
       version: 1,
