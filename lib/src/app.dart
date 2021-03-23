@@ -10,6 +10,7 @@ class App extends StatelessWidget {
     return CommentsProvider(
         child: StoriesProvider(
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         theme: ThemeData(primaryColor: Colors.blueGrey, fontFamily: 'Roboto'),
         title: 'News',
         onGenerateRoute: routes,
