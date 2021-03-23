@@ -4,7 +4,6 @@ import '../blocs/comments_provider.dart';
 import '../models/item_model.dart';
 import 'dart:async';
 import '../widgets/comment.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class NewsDetail extends StatelessWidget {
@@ -91,6 +90,7 @@ class NewsDetail extends StatelessWidget {
 
   launchUrl(String url) async {
     if (await canLaunch(url)) {
+      print('can launch');
       await launch(url);
     }
   }
