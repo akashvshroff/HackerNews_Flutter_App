@@ -128,3 +128,24 @@
 - Here, our query is also involved. The query is saved in a variable and if the FutureBuilder has data and the `ItemModel.title` contains the query, then the ListTile is displayed, else an empty container is used.
 - This sort of system is used since it means that the performant features of the ListView.builder can still be used as titles are displayed as and when you scroll through the search results and as more titles are being fetched, you can still access the ones that have already been fetched.
 - The NewsList page can also be refreshed using the [Refresh](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/widgets/refresh.dart) widget that clears all data and fetches the top ids again so that the data is refreshed in real time. Refresh also clears the editingController associated with the search TextField.
+
+### NewsDetail:
+- The [NewsDetail](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/screens/news_detail.dart) page is responsible for displaying the title of the story, the associated link and all of the comments in a visually demarcated manner highlighting the relationship between each comment.
+- To display each comment and indent it as per the relationship with the other comments, we use a custom widget, [Comment](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/widgets/comment.dart).
+
+    ```dart
+    class Comment extends StatelessWidget {
+      final int depth;
+      final int itemId;
+      final Map<int, Future<ItemModel>> itemMap;
+
+      Comment({this.itemId, this.itemMap, this.depth});
+    }
+    ```
+
+- The itemId refers to the id of the comment being displayed, the itemMap is the cache map that contains the `Future<ItemModel>` values of each of the comments and the depth is used for indendation and refers to the distance from the parent comment.
+- A ListView is used to display all the UI elements; the title, link and comments. This is done by creating a list of widgets that is passed to the ListView.
+- In the NewsDetail buildList, we add all the top-level comments to our list of widgets in the form of Comment instances and this triggers the build method of each Comment widget which returns a Column of its representation (as a ListTile) and Comment instances of all of its children (with depth incremented) and thereby creating a recursive process.
+- Therefore, the ListView contains a list composed of the title, link and all the comments. Each comment is a Comment widget which returns a Column composed of the ListTile for that comment and Comment instances of all its children.
+- The build method of the Comment widget contains a FutureBuilder that simply returns the LoadingContainer if the Future has not resolved.
+- Since the text passed by the HackerNews API is raw html, the [flutter_html](https://pub.dev/packages/flutter_html) package is used to render the content to the screen and the [url_launcher](https://pub.dev/packages/url_launcher) package is used to launch all links, including that of the top-level story and any present in a comment.
