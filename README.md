@@ -32,3 +32,42 @@
 
 ### clearCache:
 - The clearCache method is tied to a pull-to-refresh mechanism of the application and when called upon, clears all the cached data resulting in fresh data fetching the next time around.
+
+## The BLOCs:
+- The two BLOCs in this project - the StoriesBloc and the CommentsBloc as well as their respective Providers can be found in the [`src/blocs/`](https://github.com/akashvshroff/HackerNews_Flutter_App/tree/master/lib/src/blocs) dir.
+- These house the StreamControllers and methods that are responsible for the presentation of data in the project and both interface with the Repository class.
+- The two Provider classes are used to wrap the MaterialApp so that any child can access the respective BLOC by using the `static of` method of the Provider and passing it a `BuildContext`.
+
+### StoriesBloc:
+- The StoriesBloc contains a few StreamControllers, getters and associated methods. The _topIds StreamController is used to pass events that correspond to the `List<int>` of topIds that is used to build the the list of top stories displayed to the user.
+- The `_itemsFetcher` and `_itemsOutput` StreamControllers are used to fetch and return an ItemModel for each item. There is an input and output stream set-up as the id to be fetched is passed to the _itemsFetcher sink (via a getter) and this stream is then transformed using the `ScanStreamTransformer` and its results are piped to the output stream.
+- This slightly complex set-up is used to ensure that subscriptions are only made to the output stream and not to the stream that is being transformed as that leads to a number of errant transformer calls.
+- The ScanStreamTransformer outputs a cache map to the _itemsOutput stream where each item id corresponds to its respective `Future<ItemModel>` (the reason for using Futures is covered in the UI section).
+- Each of the methods in this BLOC rely on an instance of the Repository class to fetch, store and clear data.
+
+### CommentsBloc:
+- The CommentsBloc is responsible for fetching and presenting all the child comments for a particular parent story that is being presented in detail.
+- The BLOC follows the same input - transformer - output stream setup that the StoriesBloc did, with a few changes.
+- This process is a little more complex as there is a recursive call must occur owing to the nature of the HackerNews API. Each item can have a number of `kids` and therefore to fetch the entire comment thread, one has to fetch all the child comments for all the child comments of the top-level story and so on until there are no child comments. The process by which the BLOC accomplishes this, could be thought of as a queue as well.
+- First, there is a getter to the sink of the input StreamController and this getter is used only once outside the BLOC to trigger the recursive process and into the sink is added the id of the top-level parent story. The transformer then fetches (and caches) the item corresponding to each id passed into the stream and then it adds all the kid ids of that item to the sink using the getter, thereby creating a queue where the kids are added and fetched until none remain.
+
+    ```dart
+    //sink - called once outside the BLOC
+    Function(int) get fetchItemWithComments => _commentsFetcher.sink.add;
+
+    //transformer
+    _commentsTransformer() {
+        return ScanStreamTransformer<int, Map<int, Future<ItemModel>>>(
+          (cache, int id, index) {
+            cache[id] = _repository.fetchItem(id);
+            cache[id].then((ItemModel item) {
+              item.kids.forEach((kidId) => fetchItemWithComments(kidId)); //added to queue
+            });
+            return cache;
+          },
+          <int, Future<ItemModel>>{},
+        );
+      }
+    ```
+
+- Therefore, through this process, the BLOC has fetched the ItemModels for each of the comments associated with a story and stored it in the map which is piped to the output stream.
