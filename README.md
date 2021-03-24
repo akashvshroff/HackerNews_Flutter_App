@@ -12,7 +12,22 @@
 
 # Description:
 - Trying to explain the entire application and the purpose of each and every facet would render this document far too long and boring, therefore I'll just cover the application in a very barebones, structural sense. 
-- There are 3 main parts to the application: the Repository, the BLOCs and the UI. I will cover each individually as well as talk about how they combine to make the application.
+- However, before I can delve into my project, I would strongly urge you to check out the [HackerNews API]([https://github.com/HackerNews/API](https://github.com/HackerNews/API)) and understand how it works, I'll cover it very briefly under the Repository section but the description will assume that you know some basics.
 
 ## The Repository:
-- 
+- P.S - all files related to the repository are in the [`src/resources/`]() dir.
+- The repository handles all the fetching and storage of data in this project and it does so by leveraging a list of sources and a list of caches - both lists are `List<Source>` and `List<Cache>` where Source and Cache are abstract classes.
+- Presently, the only sources in the program is the HackerNews API and the SQLite database, while the only cache is the SQLite database. However, using such a system of sources and caches means that I can later add more sources and caches without having to refactor and disrupt my code.
+- The repository has a few primary functions - fetchItem, fetchTopIds and clearCache.
+
+### fetchItem:
+- The first method accepts an integer and returns a ItemModel instance that represents the item.
+- Each HackerNews component - be it a story, comment or a poll - is considered to be an item and comes with a unique id. To be able to better implement these items in the project, there is a [ItemModel class]() that can be used to create an instance of each of these components and store their respective fields.
+- The program cycles through each of the sources and aims to locate the item with the particular id and returns an instance of ItemModel. Once an item is located, it is then cached to make it easier to fetch the next time.
+
+### fetchTopIds:
+- The fetchTopIds method aims to return the `List<int>` of all the top stories as per the HackerNews API - this list contains all the ids of the top stories.
+- The list is then cached (the record of the current top stories is maintained for a day unless manually refreshed, more on that later).
+
+### clearCache:
+- The clearCache method is tied to a pull-to-refresh mechanism of the application and when called upon, clears all the cached data resulting in fresh data fetching the next time around.
