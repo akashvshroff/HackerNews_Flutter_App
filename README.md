@@ -118,11 +118,11 @@
 
     ```
     StreamBuilder (topIds)
-    -	ListView.builder (renders each id in topIds)
-    	-	NewsListTile (for each itemId)
-    		-	StreamBuilder (itemsOutput - gets cache map output)
-    			-	FutureBuilder (since each cache[id] is Future<ItemModel>)
-    				-	ListTile or LoadingContainer or empty Container
+    -ListView.builder (renders each id in topIds)
+     -NewsListTile (for each itemId)
+      -StreamBuilder (itemsOutput - gets cache map output)
+       -FutureBuilder (since each cache[id] is Future<ItemModel>)
+    	-ListTile or LoadingContainer or empty Container
     ```
 
 - Here, our query is also involved. The query is saved in a variable and if the `FutureBuilder` has data and the `ItemModel.title` contains the query, then the ListTile is displayed, else an empty container is used.
