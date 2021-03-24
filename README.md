@@ -71,3 +71,60 @@
     ```
 
 - Therefore, through this process, the BLOC has fetched the ItemModels for each of the comments associated with a story and stored it in the map which is piped to the output stream.
+
+## The UI:
+- The UI leverages the two BLOCs in order to present information in a clean and effective manner - since it is largely composed of StatelessWidgets (with the exception of the search bar - more on that later), it uses StreamBuilders in order to subscribe to the streams housed in the BLOCs and display changing information through the events of the streams.
+- Moreover, FutureBuilders are used in many scenarios to resolve Futures as and when required and display them when necessary in order to be more performant.
+- There are a few key components of the UI and I will explain them as aptly as I can.
+
+### Navigation:
+- Navigation is made extremely easy in Flutter applications owing to the Navigator object provided by the MaterialApp. Here, the Navigation is handled using the `onGenerateRoute` callback.
+- This choice is made, instead of the more common map-based routing, to allow for easy information sharing during navigation. More specifically, to share the id of the top-level parent item while going from the list of top-stories to the story page for each comment.
+- The home page i.e the list of top-stories is given a route name of `/` while the detail page is simply `/:id` where :id refers to the item id. This information is passed to the onGenerateRoute callback in the RouteSettings object via the pushNamed method.
+- In the callback, the route name is parsed and the respective MaterialPageRoute is returned with either an instance of NewsList or NewsDetail (with the item id as the instance variable).
+- Moreover, before the page is returned, there is some initial data fetching done - if the top stories are to be displayed then they are fetched and if some particular story is to be displayed, the recursive fetching process via the transformer is triggered.
+
+    ```dart
+    //onGenerateCallback: routes,
+    Route routes(RouteSettings settings) {
+        if (settings.name == '/') { //check route 
+          return MaterialPageRoute(
+            builder: (context) {
+              final storiesBloc = StoriesProvider.of(context);
+              storiesBloc.fetchTopIds(); //top stories fetching
+              return NewsList();
+            },
+          );
+        } else {
+          return MaterialPageRoute(builder: (context) {
+            final itemId = int.parse(settings.name.replaceFirst('/', '')); //parse id
+            final commentsBloc = CommentsProvider.of(context);
+
+            commentsBloc.fetchItemWithComments(itemId); //trigger recursive fetching
+     
+            return NewsDetail(
+              itemId: itemId, //itemId as an instance variable
+            );
+          });
+        }
+      }
+    ```
+
+### NewsList:
+- The [NewsList](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/screens/news_list.dart) is another key feature of the UI and is the list of top stories as well a search filter to query the list of top stories. On clicking any of the stories, the user is then taken to a detail page for the story where users can see all the comments and access the original source of the story.
+- A `StreamBuilder` is used that subscribes to the topIds stream and calls upon a `ListView.builder` in order to display the items onto the screen, this way only those items that are visible to the user are rendered. Each individual story is rendered using a custom widget, [NewsListTile](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/widgets/news_list_tile.dart) and the ListView.builder returns an instance of `NewsListTile` for each id in the topIds.
+- The ListView.builder also calls upon the input stream and tries to fetch the `ItemModel` for the particular id it is rendering and therefore the NewsListTile is also composed of a `StreamBuilder` and `FutureBuilder` that returns a custom [LoadingContainer](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/widgets/loading_container.dart) if there is no data, else it returns a `ListTile` with the story information and an `onTap` callback.
+- The process is as follows:
+
+    ```
+    StreamBuilder (topIds)
+    -	ListView.builder (renders each id in topIds)
+    	-	NewsListTile (for each itemId)
+    		-	StreamBuilder (itemsOutput - gets cache map output)
+    			-	FutureBuilder (since each cache[id] is Future<ItemModel>)
+    				-	ListTile or LoadingContainer or empty Container
+    ```
+
+- Here, our query is also involved. The query is saved in a variable and if the `FutureBuilder` has data and the `ItemModel.title` contains the query, then the ListTile is displayed, else an empty container is used.
+- This sort of system is used since it means that the performant features of the `ListView.builder` can still be used as titles are displayed as and when you scroll through the search results and as more titles are being fetched, you can still access the ones that have already been fetched.
+- The NewsList page can also be refreshed using the [Refresh](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/widgets/refresh.dart) widget that clears all data and fetches the top ids again so that the data is refreshed in real time. Refresh also clears the editingController associated with the search TextField.
