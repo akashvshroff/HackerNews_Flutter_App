@@ -113,7 +113,7 @@
 ### NewsList:
 - The [NewsList](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/screens/news_list.dart) is another key feature of the UI and is the list of top stories as well a search filter to query the list of top stories. On clicking any of the stories, the user is then taken to a detail page for the story where users can see all the comments and access the original source of the story.
 - A `StreamBuilder` is used that subscribes to the topIds stream and calls upon a `ListView.builder` in order to display the items onto the screen, this way only those items that are visible to the user are rendered. Each individual story is rendered using a custom widget, [NewsListTile](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/widgets/news_list_tile.dart) and the ListView.builder returns an instance of `NewsListTile` for each id in the topIds.
-- The ListView.builder also calls upon the input stream and tries to fetch the `ItemModel` for the particular id it is rendering and therefore the NewsListTile is also composed of a `StreamBuilder` and `FutureBuilder` that returns a custom [LoadingContainer](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/widgets/loading_container.dart) if there is no data, else it returns a `ListTile` with the story information and an `onTap` callback.
+- The ListView.builder also calls upon the input stream and tries to fetch the ItemModel for the particular id it is rendering and therefore the NewsListTile is also composed of a StreamBuilder and FutureBuilder that returns a custom [LoadingContainer](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/widgets/loading_container.dart) if there is no data, else it returns a ListTile with the story information and an `onTap` callback.
 - The process is as follows:
 
     ```
@@ -125,6 +125,6 @@
     	-ListTile or LoadingContainer or empty Container
     ```
 
-- Here, our query is also involved. The query is saved in a variable and if the `FutureBuilder` has data and the `ItemModel.title` contains the query, then the ListTile is displayed, else an empty container is used.
-- This sort of system is used since it means that the performant features of the `ListView.builder` can still be used as titles are displayed as and when you scroll through the search results and as more titles are being fetched, you can still access the ones that have already been fetched.
+- Here, our query is also involved. The query is saved in a variable and if the FutureBuilder has data and the `ItemModel.title` contains the query, then the ListTile is displayed, else an empty container is used.
+- This sort of system is used since it means that the performant features of the ListView.builder can still be used as titles are displayed as and when you scroll through the search results and as more titles are being fetched, you can still access the ones that have already been fetched.
 - The NewsList page can also be refreshed using the [Refresh](https://github.com/akashvshroff/HackerNews_Flutter_App/blob/master/lib/src/widgets/refresh.dart) widget that clears all data and fetches the top ids again so that the data is refreshed in real time. Refresh also clears the editingController associated with the search TextField.
